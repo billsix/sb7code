@@ -6,7 +6,7 @@ LINK_DIRECTORIES( ${CMAKE_SOURCE_DIR}/lib )
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Second, for multi-config builds (e.g. msvc)
 foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
@@ -22,12 +22,10 @@ set (CMAKE_DEBUG_POSTFIX "_d")
 
 if(WIN32)
 set(COMMON_LIBS sb7 optimized glfw3 debug glfw3_d ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES})
-elseif (UNIX)
+else()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLFW REQUIRED glfw3)
-set(COMMON_LIBS sb7 glfw3 X11 Xrandr Xinerama Xi Xxf86vm Xcursor GL rt dl)
-else()
-set(COMMON_LIBS sb7)
+set(COMMON_LIBS sb7 ${GLFW_LIBRARIES} X11 Xrandr Xinerama Xi Xxf86vm Xcursor GL rt dl)
 endif()
 
 set(COMMON_LIBS ${COMMON_LIBS} ${EXTRA_LIBS})
@@ -154,3 +152,18 @@ include_directories(extern/glfw-3.0.4/include)
 
 ADD_CUSTOM_TARGET(debug ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE:STRING=Debug ${PROJECT_SOURCE_DIR})
 ADD_CUSTOM_TARGET(release ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE:STRING=Release ${PROJECT_SOURCE_DIR})
+
+
+
+set(ZIPFN ${CMAKE_CURRENT_BINARY_DIR}/bin/media/superbible7-media.zip)
+
+
+
+if(NOT EXISTS ${ZIPFN})
+  file(DOWNLOAD http://openglsuperbible.com/files/superbible7-media.zip ${ZIPFN}
+       SHOW_PROGRESS
+       EXPECTED_HASH SHA1=30ba9d0ef68708633e37fce5ff135fe467ae1c95)
+endif()
+
+execute_process(COMMAND ${CMAKE_COMMAND} -E tar -xf ${ZIPFN}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin/media/)
