@@ -1,3 +1,14 @@
-bin/
+# bin/ holds built example binaries (ignored) EXCEPT the committed media pack
+# under bin/media/ (a deliberate decision; see bin/media/README.md and
+# tasks/pythonize-and-containerize-port.md).
+bin/*
+!bin/media/
 build/
 *.txt.user
+
+# Python port cruft (the port also has its own python/.gitignore)
+**/__pycache__/
+**/*.py[cod]
+**/.ruff_cache/
+**/imgui.ini
+python/venv/

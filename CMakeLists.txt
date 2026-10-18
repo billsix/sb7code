@@ -155,15 +155,17 @@ ADD_CUSTOM_TARGET(release ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE:STRING=Release ${P
 
 
 
-set(ZIPFN ${CMAKE_CURRENT_BINARY_DIR}/bin/media/superbible7-media.zip)
-
-
-
-if(NOT EXISTS ${ZIPFN})
-  file(DOWNLOAD http://openglsuperbible.com/files/superbible7-media.zip ${ZIPFN}
-       SHOW_PROGRESS
-       EXPECTED_HASH SHA1=30ba9d0ef68708633e37fce5ff135fe467ae1c95)
+# The media pack is committed in this repo's bin/media (a deliberate decision;
+# see tasks/pythonize-and-containerize-port.md). Only fall back to downloading
+# and unpacking it when that committed media is absent -- so a normal build
+# needs no network and the examples read the committed media from bin/.
+if(NOT EXISTS ${CMAKE_SOURCE_DIR}/bin/media/objects)
+  set(ZIPFN ${CMAKE_CURRENT_BINARY_DIR}/bin/media/superbible7-media.zip)
+  if(NOT EXISTS ${ZIPFN})
+    file(DOWNLOAD http://openglsuperbible.com/files/superbible7-media.zip ${ZIPFN}
+         SHOW_PROGRESS
+         EXPECTED_HASH SHA1=30ba9d0ef68708633e37fce5ff135fe467ae1c95)
+  endif()
+  execute_process(COMMAND ${CMAKE_COMMAND} -E tar -xf ${ZIPFN}
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin/media/)
 endif()
-
-execute_process(COMMAND ${CMAKE_COMMAND} -E tar -xf ${ZIPFN}
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin/media/)

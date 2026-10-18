@@ -1,0 +1,36 @@
+# Locally editable-installable package for the SuperBible 7e Python port.
+#
+# `pip install -e .` (the container does this) puts the `sb7` package of shared
+# modules on the import path, so the demo scripts import it normally
+# (`from sb7 import common, application, ...`) with no sys.path bootstrap.
+#
+# It is NOT meant for a package index: media is referenced from the C sources'
+# bin/media (never bundled), so a remote wheel would be broken -- keep it a
+# LOCAL editable install only. The demo scripts themselves are not part of the
+# package (they are run by path); only the `sb7` package is installed.
+[project]
+name = "sb7"
+version = "0.0.0"
+description = "Shared framework for the SuperBible 7e Python port (local editable install only)"
+requires-python = ">=3.12"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools.packages.find]
+include = ["sb7*"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 80
+
+[tool.ruff.lint]
+# ruff default set (E4/E7/E9, F) plus T201 (print). Explicit `select`, not
+# `extend-select` (the latter with no base select pulls in the whole catalogue
+# in ruff 0.16). A couple of demos keep a deliberate `# noqa: E402` (an import
+# after a module-level constant, not the old sys.path dance).
+select = ["E4", "E7", "E9", "F", "T201"]

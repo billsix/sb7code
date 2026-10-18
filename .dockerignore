@@ -1,0 +1,9 @@
+.git
+build
+*.tar
+__pycache__
+**/__pycache__
+**/.ruff_cache
+**/.pytest_cache
+python/venv
+**/imgui.ini
