@@ -20,6 +20,8 @@ make image                  # build the image (compiles the C++ examples)
 make run-c DEMO=blinnphong   # run a C++ example on your display (X11)
 make run   DEMO=blinnphong   # run the Python port of it (Wayland)
 make check                   # import every Python demo, no display
+make type-check              # ty + annotate-every-binding checker (no display)
+make format                  # ruff check --fix + ruff format the port
 make list                    # list the demo directories
 make shell                   # interactive shell; then: run-c <dir> / run <dir>
 ```
