@@ -128,8 +128,8 @@ class HdrbloomApp(application.Application):
         for i in range(2):
             GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, self.filter_fbo[i])
             GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex_filter[i])
-            w = MAX_SCENE_WIDTH if i else MAX_SCENE_HEIGHT
-            h = MAX_SCENE_HEIGHT if i else MAX_SCENE_WIDTH
+            w: int = MAX_SCENE_WIDTH if i else MAX_SCENE_HEIGHT
+            h: int = MAX_SCENE_HEIGHT if i else MAX_SCENE_WIDTH
             GL.glTexStorage2D(GL.GL_TEXTURE_2D, 1, GL.GL_RGBA16F, w, h)
             GL.glFramebufferTexture(
                 GL.GL_FRAMEBUFFER,
@@ -199,7 +199,7 @@ class HdrbloomApp(application.Application):
         materials: np.ndarray = np.zeros((SPHERE_COUNT, 12), dtype=np.float32)
         ambient: float = 0.002
         for i in range(SPHERE_COUNT):
-            fi = math.pi * i / 8.0
+            fi: float = math.pi * i / 8.0
             materials[i, 0] = math.sin(fi) * 0.5 + 0.5
             materials[i, 1] = math.sin(fi + 1.345) * 0.5 + 0.5
             materials[i, 2] = math.sin(fi + 2.567) * 0.5 + 0.5
@@ -218,7 +218,7 @@ class HdrbloomApp(application.Application):
 
     def load_shaders(self) -> None:
         for attr in ("program_render", "program_filter", "program_resolve"):
-            old = getattr(self, attr)
+            old: int = getattr(self, attr)
             if old:
                 GL.glDeleteProgram(old)
         self.program_render = common.compile_program_from_files(
@@ -287,9 +287,9 @@ class HdrbloomApp(application.Application):
         ubo_data[0] = proj.T
         ubo_data[1] = view.T
         for i in range(SPHERE_COUNT):
-            fi = math.pi * i / 16.0
-            r = 0.6 if (i & 2) else 1.5
-            m = vmath.translate(
+            fi: float = math.pi * i / 16.0
+            r: float = 0.6 if (i & 2) else 1.5
+            m: np.ndarray = vmath.translate(
                 math.cos(t + fi) * 5.0 * r,
                 math.sin(t + fi * 4.0) * 4.0,
                 math.sin(t + fi) * 5.0 * r,

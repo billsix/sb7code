@@ -129,7 +129,7 @@ class FragmentlistApp(application.Application):
 
     def load_shaders(self) -> None:
         for attr in ("clear_program", "append_program", "resolve_program"):
-            old = getattr(self, attr)
+            old: int = getattr(self, attr)
             if old:
                 GL.glDeleteProgram(old)
         self.clear_program = common.compile_program_from_files(
@@ -190,7 +190,7 @@ class FragmentlistApp(application.Application):
         GL.glUseProgram(self.append_program)
 
         model: np.ndarray = vmath.scale(7.0)
-        eye = (
+        eye: tuple[float, float, float] = (
             math.cos(f * 0.35) * 120.0,
             math.cos(f * 0.4) * 30.0,
             math.sin(f * 0.35) * 120.0,

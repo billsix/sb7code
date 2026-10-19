@@ -34,7 +34,9 @@ If the file can't be opened or the identifier doesn't match, returns
 from __future__ import annotations
 
 import dataclasses
+import io
 import struct
+from typing import TypeAlias
 
 import OpenGL.GL as GL
 from OpenGL.constant import Constant
@@ -43,15 +45,15 @@ from OpenGL.constant import Constant
 #: resolve to ``OpenGL.constant.Constant``, not ``int``, so a plain
 #: ``int`` annotation rejects them (house pattern, same as
 #: ``src/modelviewprojection/wxapp.py``).
-GLenum = int | Constant
+GLenum: TypeAlias = int | Constant
 
-_IDENTIFIER = bytes(
+_IDENTIFIER: bytes = bytes(
     [0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A]
 )
 
 # KTX header is 12 (identifier) + 13 × 4 = 64 bytes.
-_HEADER_FMT_NATIVE = "<13I"  # little-endian after we know endianness
-_HEADER_FMT_SWAP = ">13I"
+_HEADER_FMT_NATIVE: str = "<13I"  # little-endian after we know endianness
+_HEADER_FMT_SWAP: str = ">13I"
 
 
 @dataclasses.dataclass(slots=True)
@@ -85,10 +87,10 @@ def _parse_header(buf: bytes) -> Header:
         raise ValueError("not a KTX 1.0 file (bad identifier)")
     # The endianness field is the first uint32 *after* the identifier.
     # Try native (LE) first; if that gives 0x04030201, we're correct.
-    fields_le = struct.unpack(_HEADER_FMT_NATIVE, buf[12:64])
+    fields_le: tuple[int, ...] = struct.unpack(_HEADER_FMT_NATIVE, buf[12:64])
     if fields_le[0] == 0x04030201:
         return Header(*fields_le)
-    fields_be = struct.unpack(_HEADER_FMT_SWAP, buf[12:64])
+    fields_be: tuple[int, ...] = struct.unpack(_HEADER_FMT_SWAP, buf[12:64])
     if fields_be[0] == 0x04030201:
         return Header(*fields_be)
     raise ValueError(f"unrecognized endianness 0x{fields_le[0]:08X}")
@@ -105,7 +107,7 @@ def _sized_internal_format(internal: int, gltype: int) -> GLenum:
     # 8/16/32-bit unsigned-byte / half-float / float combos. BGR and
     # BGRA are storage-equivalent to RGB/RGBA — only the upload swizzle
     # differs.
-    base_to_sized = {
+    base_to_sized: dict[tuple[GLenum, GLenum], GLenum] = {
         (GL.GL_RED, GL.GL_UNSIGNED_BYTE): GL.GL_R8,
         (GL.GL_RG, GL.GL_UNSIGNED_BYTE): GL.GL_RG8,
         (GL.GL_RGB, GL.GL_UNSIGNED_BYTE): GL.GL_RGB8,
@@ -147,8 +149,8 @@ def _channels_for_format(fmt: int) -> int:
 def _calculate_stride(h: Header, width: int, pad: int = 4) -> int:
     """Bytes per row, padded up to ``pad`` (default 4). Mirrors the
     C++ ``calculate_stride`` helper."""
-    channels = _channels_for_format(h.glbaseinternalformat)
-    stride = h.gltypesize * channels * width
+    channels: int = _channels_for_format(h.glbaseinternalformat)
+    stride: int = h.gltypesize * channels * width
     stride = (stride + (pad - 1)) & ~(pad - 1)
     return stride
 
@@ -183,34 +185,38 @@ def load(filename: str, tex: int = 0) -> int:
     Generates mipmaps via ``glGenerateMipmap`` when the file contains
     only a single level (matches the C++ behavior)."""
     try:
+        f: io.BufferedReader
         with open(filename, "rb") as f:
-            data = f.read()
+            data: bytes = f.read()
     except OSError:
         return 0
 
     try:
-        h = _parse_header(data[:64])
+        h: Header = _parse_header(data[:64])
     except ValueError:
         return 0
 
+    width: int
+    height: int
+    depth: int
     width, height, depth = h.pixelwidth, h.pixelheight, h.pixeldepth
     if width == 0 or (height == 0 and depth != 0):
         return 0
 
-    target = _detect_target(h)
+    target: GLenum = _detect_target(h)
 
     if tex == 0:
         tex: int = GL.glGenTextures(1)
     GL.glBindTexture(target, tex)
 
-    image_start = 64 + h.keypairbytes
-    image_data = data[image_start:]
+    image_start: int = 64 + h.keypairbytes
+    image_data: bytes = data[image_start:]
 
-    miplevels = h.miplevels if h.miplevels != 0 else 1
+    miplevels: int = h.miplevels if h.miplevels != 0 else 1
 
     # glTexStorage* needs a sized internal format; some KTX files
     # store an unsized base format (GL_RGB, GL_RGBA, …). Upgrade.
-    sized = _sized_internal_format(h.glinternalformat, h.gltype)
+    sized: GLenum = _sized_internal_format(h.glinternalformat, h.gltype)
 
     if target == GL.GL_TEXTURE_1D:
         GL.glTexStorage1D(GL.GL_TEXTURE_1D, miplevels, sized, width)
@@ -237,10 +243,13 @@ def load(filename: str, tex: int = 0) -> int:
             GL.glTexStorage2D(GL.GL_TEXTURE_2D, miplevels, sized, width, height)
             GL.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1)
             offset: int = 0
+            mw: int
+            mh: int
             mw, mh = width, height
+            level: int
             for level in range(miplevels):
-                stride = _calculate_stride(h, mw, 1)
-                level_size = stride * mh
+                stride: int = _calculate_stride(h, mw, 1)
+                level_size: int = stride * mh
                 GL.glTexSubImage2D(
                     GL.GL_TEXTURE_2D,
                     level,
@@ -313,9 +322,10 @@ def load(filename: str, tex: int = 0) -> int:
         GL.glTexStorage2D(
             GL.GL_TEXTURE_CUBE_MAP, miplevels, sized, width, height
         )
-        face_size = _calculate_face_size(h)
+        face_size: int = _calculate_face_size(h)
+        i: int
         for i in range(h.faces):
-            face_data = image_data[face_size * i : face_size * (i + 1)]
+            face_data: bytes = image_data[face_size * i : face_size * (i + 1)]
             GL.glTexSubImage2D(
                 # PyOpenGL constants are int subclasses at runtime, but
                 # the stubs' `Constant` declares no `__add__`.

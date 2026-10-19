@@ -16,6 +16,7 @@ from typing import override
 import glfw  # noqa: F401
 import OpenGL.GL as GL
 from imgui_bundle import imgui  # noqa: F401
+from OpenGL.constant import Constant
 
 from sb7 import application, common, ktx
 
@@ -50,14 +51,19 @@ void main(void)
 }
 """
 
-WRAP_MODES = [
+WRAP_MODES: list[tuple[Constant, str]] = [
     (GL.GL_CLAMP_TO_EDGE, "GL_CLAMP_TO_EDGE"),
     (GL.GL_REPEAT, "GL_REPEAT"),
     (GL.GL_CLAMP_TO_BORDER, "GL_CLAMP_TO_BORDER"),
     (GL.GL_MIRRORED_REPEAT, "GL_MIRRORED_REPEAT"),
 ]
 
-OFFSETS = [(-0.5, -0.5), (0.5, -0.5), (-0.5, 0.5), (0.5, 0.5)]
+OFFSETS: list[tuple[float, float]] = [
+    (-0.5, -0.5),
+    (0.5, -0.5),
+    (-0.5, 0.5),
+    (0.5, 0.5),
+]
 
 
 class WrapmodesApp(application.Application):

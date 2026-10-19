@@ -51,7 +51,7 @@ CHUNK_COUNT: int = 4
 # CHUNK_SIZE * CHUNK_COUNT, but the per-index stride is 128 bytes.
 CHUNK_SIZE: int = 192
 MATRICES_BYTES: int = 128
-BUFFER_SIZE = CHUNK_SIZE * CHUNK_COUNT
+BUFFER_SIZE: int = CHUNK_SIZE * CHUNK_COUNT
 
 NO_SYNC, FINISH, ONE_SYNC, RINGED_SYNC = 0, 1, 2, 3
 MODE_NAMES: list[str] = ["NO_SYNC", "FINISH", "ONE_SYNC", "RINGED_SYNC"]
@@ -77,16 +77,20 @@ class PmbstreamingApp(application.Application):
         # PyOpenGL constants are int subclasses at runtime, but the
         # stubs' `Constant` declares no `__or__`, so OR-ing two masks
         # trips ty.
-        flags = (
+        flags: int = (
             GL.GL_MAP_WRITE_BIT  # ty: ignore[unsupported-operator]
             | GL.GL_MAP_PERSISTENT_BIT
             | GL.GL_MAP_COHERENT_BIT
         )
         GL.glBufferStorage(GL.GL_UNIFORM_BUFFER, BUFFER_SIZE, None, flags)
-        ptr = GL.glMapBufferRange(GL.GL_UNIFORM_BUFFER, 0, BUFFER_SIZE, flags)
+        ptr: int = GL.glMapBufferRange(
+            GL.GL_UNIFORM_BUFFER, 0, BUFFER_SIZE, flags
+        )
         # Wrap as a (CHUNK_COUNT, 2, 4, 4) float32 view — each entry
         # is a (modelview, projection) mat4 pair. Stride 128 bytes.
-        c_arr = (ctypes.c_float * (BUFFER_SIZE // 4)).from_address(int(ptr))
+        c_arr: ctypes.Array[ctypes.c_float] = (
+            ctypes.c_float * (BUFFER_SIZE // 4)
+        ).from_address(int(ptr))
         # The mapped region as raw float32 (BUFFER_SIZE/4 floats).
         # We index in element-units: each MATRICES is 32 floats.
         self._mapped_floats: np.ndarray | None = np.frombuffer(
@@ -133,7 +137,9 @@ class PmbstreamingApp(application.Application):
         # Pre-write sync (ONE_SYNC and RINGED_SYNC).
         self.stalled = False
         if self.mode == ONE_SYNC and self.fence[0] is not None:
-            status = GL.glGetSynciv(self.fence[0], GL.GL_SYNC_STATUS, 4)
+            status: np.ndarray = GL.glGetSynciv(
+                self.fence[0], GL.GL_SYNC_STATUS, 4
+            )
             self.stalled = status[1] == GL.GL_UNSIGNALED
             GL.glClientWaitSync(self.fence[0], 0, GL.GL_TIMEOUT_IGNORED)
             GL.glDeleteSync(self.fence[0])

@@ -21,9 +21,11 @@ This module:
 from __future__ import annotations
 
 import ctypes
+import io
 import os
 import re
-from typing import Iterable, Optional, Sequence
+from collections.abc import Callable
+from typing import Any, Iterable, Optional, Sequence, TypeAlias
 
 import OpenGL.GL as GL
 from OpenGL.constant import Constant
@@ -34,22 +36,28 @@ from . import window
 #: resolve to ``OpenGL.constant.Constant``, not ``int``, so a plain
 #: ``int`` annotation rejects them (house pattern, same as
 #: ``src/modelviewprojection/wxapp.py``).
-GLenum = int | Constant
+GLenum: TypeAlias = int | Constant
 
-_HERE = os.path.dirname(os.path.abspath(__file__))
+_HERE: str = os.path.dirname(os.path.abspath(__file__))
 
 # Re-export the vendored window/menubar/camera helpers (from window.py).
-Camera = window.Camera
-SceneObject = window.SceneObject
-WindowState = window.WindowState
-apply_camera = window.apply_camera
-bind_camera_inputs = window.bind_camera_inputs
-draw_camera_controls = window.draw_camera_controls
-draw_menubar = window.draw_menubar
-init_imgui = window.init_imgui
-resolve_default_window_size = window.resolve_default_window_size
-toggle_fullscreen = window.toggle_fullscreen
-update_camera = window.update_camera
+# ``TypeAlias`` keeps each class usable both as a type (``x: common.Camera``)
+# and as a constructor; the functions take ``Callable[..., R]`` (any arg list)
+# so their keyword/optional parameters stay callable through ``common.`` -- the
+# real signatures live on ``window.py``.
+Camera: TypeAlias = window.Camera
+SceneObject: TypeAlias = window.SceneObject
+WindowState: TypeAlias = window.WindowState
+apply_camera: Callable[..., None] = window.apply_camera
+bind_camera_inputs: Callable[..., None] = window.bind_camera_inputs
+draw_camera_controls: Callable[..., None] = window.draw_camera_controls
+draw_menubar: Callable[..., None] = window.draw_menubar
+init_imgui: Callable[..., Any] = window.init_imgui
+resolve_default_window_size: Callable[..., tuple[int, int]] = (
+    window.resolve_default_window_size
+)
+toggle_fullscreen: Callable[..., None] = window.toggle_fullscreen
+update_camera: Callable[..., None] = window.update_camera
 
 
 # Path where v7 media (KTX textures, SBM models, GLSL shaders) lives.
@@ -71,7 +79,7 @@ update_camera = window.update_camera
 
 
 def _find_media_dir() -> str | None:
-    env = os.environ.get("SB7_MEDIA")
+    env: str | None = os.environ.get("SB7_MEDIA")
     if env and os.path.isdir(env):
         return os.path.abspath(env)
 
@@ -87,17 +95,19 @@ def _find_media_dir() -> str | None:
         return in_port
 
     # Walk up looking for a sibling/cousin checkout of the C repo.
-    current = _HERE
+    current: str = _HERE
     for _ in range(8):
-        parent = os.path.dirname(current)
+        parent: str = os.path.dirname(current)
         if parent == current:
             break
+        name: str
         for name in ("sb7code", "superbiblev7"):
             candidate: str = os.path.join(parent, name, "bin", "media")
             if os.path.isdir(candidate):
                 return candidate
         current = parent
 
+    fallback: str
     for fallback in ("/sb7code/bin/media", "/superbiblev7/bin/media"):
         if os.path.isdir(fallback):
             return fallback
@@ -105,7 +115,7 @@ def _find_media_dir() -> str | None:
     return None
 
 
-MEDIA_DIR = _find_media_dir()
+MEDIA_DIR: str | None = _find_media_dir()
 
 
 def require_media() -> str:
@@ -148,8 +158,8 @@ def _ensure_flat_on_integer_varyings(source: str) -> str:
     interpolation qualifier (so we never emit ``flat flat int``)."""
 
     def _patch_block(m: re.Match[str]) -> str:
-        prefix = m.group(1)
-        body = m.group(2)
+        prefix: str = m.group(1)
+        body: str = m.group(2)
         body = re.sub(
             r"^([ \t]*)(?!(?:flat|noperspective|smooth|centroid|patch)\b)"
             r"(int|uint|ivec[234]|uvec[234])(\s+\w+\s*;)",
@@ -159,7 +169,7 @@ def _ensure_flat_on_integer_varyings(source: str) -> str:
         )
         return prefix + "{" + body + "}"
 
-    pattern = re.compile(
+    pattern: re.Pattern[str] = re.compile(
         r"((?:^|\n)\s*(?:in|out)\s+\w+\s*)\{([^{}]*)\}",
         flags=re.DOTALL,
     )
@@ -178,7 +188,9 @@ def _ensure_binding_qualifier_version(source: str) -> str:
     if "binding" not in source:
         return source
     # Match `#version 4XX core` where XX < 20 and bump to 420.
-    m = re.search(r"^\s*#version\s+(\d+)\s+core", source, re.MULTILINE)
+    m: re.Match[str] | None = re.search(
+        r"^\s*#version\s+(\d+)\s+core", source, re.MULTILINE
+    )
     if not m:
         return source
     ver: int = int(m.group(1))
@@ -207,9 +219,9 @@ def compile_shader(source: str, shader_type: GLenum) -> int:
     shader: int = GL.glCreateShader(shader_type)
     GL.glShaderSource(shader, source)
     GL.glCompileShader(shader)
-    status = GL.glGetShaderiv(shader, GL.GL_COMPILE_STATUS)
+    status: int = GL.glGetShaderiv(shader, GL.GL_COMPILE_STATUS)
     if not status:
-        log = GL.glGetShaderInfoLog(shader).decode(errors="replace")
+        log: str = GL.glGetShaderInfoLog(shader).decode(errors="replace")
         GL.glDeleteShader(shader)
         raise ShaderError(f"shader compile failed: {log}")
     return shader
@@ -219,6 +231,7 @@ def compile_shader_from_file(path: str, shader_type: GLenum) -> int:
     # errors="replace": upstream shaders are ASCII except for the odd Latin-1
     # byte in a copyright comment (rgtc/rgtccompress.cs.glsl has a 0xA9 (c));
     # the C++ handed the compiler raw bytes, so decoding must not raise.
+    f: io.TextIOWrapper
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         return compile_shader(f.read(), shader_type)
 
@@ -243,6 +256,7 @@ def link_program(
     not specified."""
     program: int = GL.glCreateProgram()
     shaders = list(shaders)
+    s: int
     for s in shaders:
         GL.glAttachShader(program, s)
     if tf_varyings is not None:
@@ -251,18 +265,24 @@ def link_program(
         # type check even though it has the right memory layout. Build
         # a backing list of ``c_char`` buffers, an array of pointers
         # into them, and cast to LP_LP_c_char.
-        encoded = [
+        encoded: list[bytes] = [
             v.encode("ascii") if isinstance(v, str) else v for v in tf_varyings
         ]
         # Keep the buffers alive until link finishes — assign back so
         # they don't get GC'd.
-        _buffers = [ctypes.create_string_buffer(s) for s in encoded]
-        lp_char = ctypes.POINTER(ctypes.c_char)
-        ptrs = (lp_char * len(_buffers))(
-            *[ctypes.cast(b, lp_char) for b in _buffers]
+        _buffers: list[ctypes.Array[ctypes.c_char]] = [
+            ctypes.create_string_buffer(s) for s in encoded
+        ]
+        lp_char: type[ctypes._Pointer[ctypes.c_char]] = ctypes.POINTER(
+            ctypes.c_char
         )
-        names_ptr = ctypes.cast(ptrs, ctypes.POINTER(lp_char))
-        mode = (
+        ptrs: ctypes.Array[ctypes._Pointer[ctypes.c_char]] = (
+            lp_char * len(_buffers)
+        )(*[ctypes.cast(b, lp_char) for b in _buffers])
+        names_ptr: ctypes._Pointer[ctypes._Pointer[ctypes.c_char]] = (
+            ctypes.cast(ptrs, ctypes.POINTER(lp_char))
+        )
+        mode: GLenum = (
             tf_buffer_mode
             if tf_buffer_mode is not None
             else GL.GL_SEPARATE_ATTRIBS
@@ -271,9 +291,9 @@ def link_program(
             program, len(tf_varyings), names_ptr, mode
         )
     GL.glLinkProgram(program)
-    status = GL.glGetProgramiv(program, GL.GL_LINK_STATUS)
+    status: int = GL.glGetProgramiv(program, GL.GL_LINK_STATUS)
     if not status:
-        log = GL.glGetProgramInfoLog(program).decode(errors="replace")
+        log: str = GL.glGetProgramInfoLog(program).decode(errors="replace")
         GL.glDeleteProgram(program)
         raise ShaderError(f"program link failed: {log}")
     for s in shaders:
@@ -308,7 +328,7 @@ def compile_program(
     ``GL_SEPARATE_ATTRIBS``; pass ``GL.GL_INTERLEAVED_ATTRIBS`` to
     pack into one buffer.
     """
-    pairs = [
+    pairs: list[tuple[str | None, GLenum]] = [
         (vs, GL.GL_VERTEX_SHADER),
         (fs, GL.GL_FRAGMENT_SHADER),
         (gs, GL.GL_GEOMETRY_SHADER),
@@ -316,7 +336,7 @@ def compile_program(
         (tes, GL.GL_TESS_EVALUATION_SHADER),
         (cs, GL.GL_COMPUTE_SHADER),
     ]
-    shaders = [
+    shaders: list[int] = [
         compile_shader(src, kind) for src, kind in pairs if src is not None
     ]
     if not shaders:
@@ -347,6 +367,7 @@ def compile_program_from_files(
         if p is None:
             return None
         # See compile_shader_from_file for why errors="replace".
+        f: io.TextIOWrapper
         with open(p, "r", encoding="utf-8", errors="replace") as f:
             return f.read()
 

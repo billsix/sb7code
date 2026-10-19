@@ -165,9 +165,11 @@ class GstessellateApp(application.Application):
         # GL_ARRAY_BUFFER (for the vertex positions, with offset).
         self.buffer: int = GL.glGenBuffers(1)
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.buffer)
-        total = TETRA_VERTS.nbytes + TETRA_INDICES.nbytes
         GL.glBufferData(
-            GL.GL_ELEMENT_ARRAY_BUFFER, total, None, GL.GL_STATIC_DRAW
+            GL.GL_ELEMENT_ARRAY_BUFFER,
+            TETRA_VERTS.nbytes + TETRA_INDICES.nbytes,
+            None,
+            GL.GL_STATIC_DRAW,
         )
         GL.glBufferSubData(
             GL.GL_ELEMENT_ARRAY_BUFFER, 0, TETRA_INDICES.nbytes, TETRA_INDICES

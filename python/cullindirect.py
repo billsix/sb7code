@@ -52,8 +52,8 @@ def _upload_mapped(target: common.GLenum, data: np.ndarray) -> None:
     These buffers are created with ``glBufferStorage`` *without*
     ``GL_DYNAMIC_STORAGE_BIT``, so ``glBufferSubData`` on them raises
     ``GL_INVALID_OPERATION`` (1282) — you must map, write, unmap."""
-    src = np.ascontiguousarray(data)
-    ptr = GL.glMapBufferRange(
+    src: np.ndarray = np.ascontiguousarray(data)
+    ptr: int = GL.glMapBufferRange(
         target,
         0,
         src.nbytes,
@@ -103,7 +103,7 @@ class CullindirectApp(application.Application):
         # CandidateDraw SSBO: built once, immutable.
         self.candidates_buf: int = GL.glGenBuffers(1)
         GL.glBindBuffer(GL.GL_SHADER_STORAGE_BUFFER, self.candidates_buf)
-        sub_count = self.object.get_sub_object_count()
+        sub_count: int = self.object.get_sub_object_count()
         candidates: np.ndarray = np.zeros(
             CANDIDATE_COUNT,
             dtype=[
@@ -211,9 +211,9 @@ class CullindirectApp(application.Application):
         GL.glBindBufferBase(GL.GL_UNIFORM_BUFFER, 0, self.model_ubo)
         models: np.ndarray = np.empty((NUM_INSTANCES, 4, 4), dtype=np.float32)
         for i in range(NUM_INSTANCES):
-            f = i / 127.0 + t * 0.025
-            g = i / 127.0
-            pos = 70.0 * np.array(
+            f: float = i / 127.0 + t * 0.025
+            g: float = i / 127.0
+            pos: np.ndarray = 70.0 * np.array(
                 [np.sin(f * 3.0), np.cos(f * 5.0), np.cos(f * 9.0)],
                 dtype=np.float32,
             )
@@ -230,7 +230,7 @@ class CullindirectApp(application.Application):
 
         # Fill transforms UBO.
         GL.glBindBufferBase(GL.GL_UNIFORM_BUFFER, 1, self.transforms_ubo)
-        ct = t * 0.1
+        ct: float = t * 0.1
         eye: np.ndarray = np.array(
             [150.0 * np.cos(ct), 0.0, 150.0 * np.sin(ct)], dtype=np.float32
         )
@@ -245,8 +245,8 @@ class CullindirectApp(application.Application):
             1.0,
             2000.0,
         )
-        vp = proj @ view
-        transforms = np.stack([view.T, proj.T, vp.T])
+        vp: np.ndarray = proj @ view
+        transforms: np.ndarray = np.stack([view.T, proj.T, vp.T])
         _upload_mapped(GL.GL_UNIFORM_BUFFER, transforms)
 
         # Cull pass.

@@ -30,6 +30,7 @@ from typing import override
 import glfw  # noqa: F401
 import numpy as np
 import OpenGL.GL as GL
+from OpenGL.constant import Constant
 from imgui_bundle import imgui
 
 from sb7 import application, common, vmath
@@ -177,7 +178,7 @@ VERTEX_POSITIONS: np.ndarray = np.array(
 # Each transform_t is mv (mat4) + proj (mat4) = 128 bytes. For the
 # UBO we'll pack 256 transforms = 32 KB.
 TRANSFORM_SIZE: int = 128
-UBO_SIZE = NUM_CUBES * TRANSFORM_SIZE
+UBO_SIZE: int = NUM_CUBES * TRANSFORM_SIZE
 
 
 class MultimaterialApp(application.Application):
@@ -296,7 +297,9 @@ class MultimaterialApp(application.Application):
         self._last_time = current_time
         t: float = self._total_time
 
-        prim = GL.GL_TRIANGLES if self.draw_triangles else GL.GL_POINTS
+        prim: int | Constant = (
+            GL.GL_TRIANGLES if self.draw_triangles else GL.GL_POINTS
+        )
 
         if self.mode == SIMPLE_UNIFORM:
             self._render_simple_uniform(t, prim)
@@ -327,7 +330,7 @@ class MultimaterialApp(application.Application):
         GL.glClearBufferfv(GL.GL_COLOR, 0, color)
         GL.glClearBufferfv(GL.GL_DEPTH, 0, one)
 
-    def _render_simple_uniform(self, t: float, prim) -> None:
+    def _render_simple_uniform(self, t: float, prim: int | Constant) -> None:
         self._clear([0.0, 0.25, 0.0, 1.0])
         block, proj = self._build_transforms(t)
         GL.glUseProgram(self.simple_uniform_program)
@@ -356,7 +359,7 @@ class MultimaterialApp(application.Application):
             GL.GL_UNIFORM_BUFFER, 0, block.nbytes, np.ascontiguousarray(block)
         )
 
-    def _render_ubo_uniform(self, t: float, prim) -> None:
+    def _render_ubo_uniform(self, t: float, prim: int | Constant) -> None:
         self._clear([0.0, 0.0, 0.25, 1.0])
         GL.glUseProgram(self.ubo_plus_uniform_program)
         self._upload_ubo(t)
@@ -366,7 +369,7 @@ class MultimaterialApp(application.Application):
                 GL.glDrawArraysInstancedBaseInstance(prim, 0, 36, 1, 0)
 
     def _render_ubo_baseinstance(
-        self, t: float, prim, indirect: bool = False
+        self, t: float, prim: int | Constant, indirect: bool = False
     ) -> None:
         self._clear([0.25, 0.0, 0.0, 1.0])
         GL.glUseProgram(self.ubo_plus_base_instance_program)
@@ -375,14 +378,14 @@ class MultimaterialApp(application.Application):
             for i in range(NUM_CUBES):
                 GL.glDrawArraysInstancedBaseInstance(prim, 0, 36, 1, i)
 
-    def _render_ubo_instanced(self, t: float, prim) -> None:
+    def _render_ubo_instanced(self, t: float, prim: int | Constant) -> None:
         self._clear([0.25, 0.25, 0.0, 1.0])
         GL.glUseProgram(self.ubo_plus_base_instance_program)
         self._upload_ubo(t)
         for _ in range(NUM_PASSES):
             GL.glDrawArraysInstancedBaseInstance(prim, 0, 36, NUM_CUBES, 0)
 
-    def _render_ubo_indirect(self, t: float, prim) -> None:
+    def _render_ubo_indirect(self, t: float, prim: int | Constant) -> None:
         self._clear([0.25, 0.0, 0.25, 1.0])
         GL.glUseProgram(self.ubo_plus_base_instance_program)
         self._upload_ubo(t)

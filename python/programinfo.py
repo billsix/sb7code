@@ -13,7 +13,9 @@ Doesn't draw any geometry — it's a pure introspection demo.
 
 from typing import override
 
+import numpy as np
 import OpenGL.GL as GL
+from OpenGL.constant import Constant
 
 from sb7 import application
 from imgui_bundle import imgui  # noqa: E402
@@ -70,7 +72,7 @@ void main(void)
 
 
 # Mirror of type_to_name_table from the C++ source.
-_TYPE_NAMES = {
+_TYPE_NAMES: dict[Constant, str] = {
     GL.GL_FLOAT: "float",
     GL.GL_FLOAT_VEC2: "vec2",
     GL.GL_FLOAT_VEC3: "vec3",
@@ -115,7 +117,7 @@ class PrograminfoApp(application.Application):
         GL.glAttachShader(self.program, fs)
         GL.glLinkProgram(self.program)
 
-        log = GL.glGetProgramInfoLog(self.program)
+        log: bytes | str = GL.glGetProgramInfoLog(self.program)
         log_str: str = (
             log.decode(errors="replace") if isinstance(log, bytes) else str(log)
         )
@@ -127,9 +129,9 @@ class PrograminfoApp(application.Application):
             self.program, GL.GL_PROGRAM_OUTPUT, GL.GL_ACTIVE_RESOURCES
         )
 
-        props = [GL.GL_TYPE, GL.GL_LOCATION, GL.GL_ARRAY_SIZE]
+        props: list[Constant] = [GL.GL_TYPE, GL.GL_LOCATION, GL.GL_ARRAY_SIZE]
         for i in range(n_outputs):
-            name_bytes = GL.glGetProgramResourceName(
+            name_bytes: bytes | str = GL.glGetProgramResourceName(
                 self.program, GL.GL_PROGRAM_OUTPUT, i, 64
             )
             name: str = (
@@ -137,14 +139,14 @@ class PrograminfoApp(application.Application):
                 if isinstance(name_bytes, bytes)
                 else str(name_bytes)
             )
-            params = GL.glGetProgramResourceiv(
+            params: np.ndarray = GL.glGetProgramResourceiv(
                 self.program, GL.GL_PROGRAM_OUTPUT, i, 3, props, 3
             )
             type_name: str = _TYPE_NAMES.get(
                 params[0], f"<type 0x{params[0]:04X}>"
             )
-            loc = params[1]
-            arr_size = params[2]
+            loc: int = params[1]
+            arr_size: int = params[2]
             if arr_size != 0:
                 self.lines.append(
                     f"Index {i}: {type_name} {name}[{arr_size}] @ location {loc}."

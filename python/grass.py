@@ -185,7 +185,11 @@ class GrassApp(application.Application):
         GL.glClearBufferfv(GL.GL_COLOR, 0, black)
         GL.glClearBufferfv(GL.GL_DEPTH, 0, one)
 
-        eye = (math.sin(t) * r, 25.0, math.cos(t) * r)
+        eye: tuple[float, float, float] = (
+            math.sin(t) * r,
+            25.0,
+            math.cos(t) * r,
+        )
         mv: np.ndarray = vmath.lookat(eye, (0.0, -50.0, 0.0), (0.0, 1.0, 0.0))
         aspect: float = float(self.info.window_width) / float(
             max(1, self.info.window_height)

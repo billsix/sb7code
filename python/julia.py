@@ -886,11 +886,11 @@ class JuliaApp(application.Application):
 
         if not self.paused:
             self._t = float(current_time)
-        r = self._t + self.time_offset
+        r: float = self._t + self.time_offset
 
         import math
 
-        c_param = (
+        c_param: tuple[float, float] = (
             (math.sin(r * 0.1) + math.cos(r * 0.23)) * 0.5,
             (math.cos(r * 0.13) + math.sin(r * 0.21)) * 0.5,
         )

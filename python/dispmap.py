@@ -100,7 +100,7 @@ class DispmapApp(application.Application):
         if not self.paused:
             self._total_time += current_time - self._last_time
         self._last_time = current_time
-        t = self._total_time * 0.03
+        t: float = self._total_time * 0.03
         r: float = math.sin(t * 5.37) * 15.0 + 16.0
         h: float = math.cos(t * 4.79) * 2.0 + 3.2
 
@@ -108,7 +108,7 @@ class DispmapApp(application.Application):
         GL.glClearBufferfv(GL.GL_COLOR, 0, sky)
         GL.glClearBufferfv(GL.GL_DEPTH, 0, one)
 
-        eye = (math.sin(t) * r, h, math.cos(t) * r)
+        eye: tuple[float, float, float] = (math.sin(t) * r, h, math.cos(t) * r)
         mv: np.ndarray = vmath.lookat(eye, (0.0, 0.0, 0.0), (0.0, 1.0, 0.0))
         aspect: float = float(self.info.window_width) / float(
             max(1, self.info.window_height)

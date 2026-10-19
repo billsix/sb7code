@@ -99,13 +99,13 @@ class ClipdistanceApp(application.Application):
         plane_rot: np.ndarray = vmath.rotate(
             f * 6.0, 1.0, 0.0, 0.0
         ) @ vmath.rotate(f * 7.3, 0.0, 1.0, 0.0)
-        plane = plane_rot[0].copy()
+        plane: np.ndarray = plane_rot[0].copy()
         plane[3] = 0.0
-        n = (plane[0] ** 2 + plane[1] ** 2 + plane[2] ** 2) ** 0.5
+        n: np.float32 = (plane[0] ** 2 + plane[1] ** 2 + plane[2] ** 2) ** 0.5
         if n > 0:
             plane[:3] /= n
 
-        clip_sphere = (
+        clip_sphere: tuple[float, float, float, float] = (
             math.sin(f * 0.7) * 3.0,
             math.cos(f * 1.9) * 3.0,
             math.sin(f * 0.1) * 3.0,

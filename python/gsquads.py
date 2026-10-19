@@ -104,7 +104,7 @@ class GsquadsApp(application.Application):
             @ vmath.rotate(t * 30.0, 1.0, 0.0, 0.0)
         )
         proj: np.ndarray = vmath.perspective(50.0, aspect, 0.1, 1000.0)
-        mvp = proj @ mv
+        mvp: np.ndarray = proj @ mv
 
         if self.mode == 0:
             GL.glUseProgram(self.program_fans)

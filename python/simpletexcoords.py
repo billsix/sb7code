@@ -20,7 +20,7 @@ from imgui_bundle import imgui
 from sb7 import application, common, ktx, sb6m, vmath
 
 
-def _shader_path(name):
+def _shader_path(name: str) -> str:
     return os.path.join(
         common.require_media(), "shaders", "simpletexcoords", name
     )
@@ -30,8 +30,8 @@ def _build_checker(size: int = 16) -> np.ndarray:
     """16x16 black/white checker with alpha=0xFF — same data layout as
     the C++ source's static array (RGBA bytes, alternating black/white per
     row + alternating per col)."""
-    black = (0x00, 0x00, 0x00, 0x00)
-    white = (0xFF, 0xFF, 0xFF, 0xFF)
+    black: tuple[int, int, int, int] = (0x00, 0x00, 0x00, 0x00)
+    white: tuple[int, int, int, int] = (0xFF, 0xFF, 0xFF, 0xFF)
     arr: np.ndarray = np.empty((size, size, 4), dtype=np.uint8)
     for y in range(size):
         for x in range(size):
@@ -40,21 +40,21 @@ def _build_checker(size: int = 16) -> np.ndarray:
 
 
 class SimpletexcoordsApp(application.Application):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.render_prog = 0
-        self.tex_index = 0
+        self.render_prog: int = 0
+        self.tex_index: int = 0
 
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.info.title = "OpenGL SuperBible - Texture Coordinates"
 
     @override
-    def startup(self):
+    def startup(self) -> None:
         media: str = common.require_media()
 
         # Texture 0: 16x16 procedural checker.
-        self.tex_object = [GL.glGenTextures(1), 0]
+        self.tex_object: list[int] = [GL.glGenTextures(1), 0]
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.tex_object[0])
         GL.glTexStorage2D(GL.GL_TEXTURE_2D, 1, GL.GL_RGB8, 16, 16)
         GL.glTexSubImage2D(
@@ -82,7 +82,7 @@ class SimpletexcoordsApp(application.Application):
         if not self.tex_object[1]:
             raise RuntimeError("failed to load pattern1.ktx")
 
-        self.torus = sb6m.Object()
+        self.torus: sb6m.Object = sb6m.Object()
         self.torus.load(os.path.join(media, "objects", "torus_nrms_tc.sbm"))
 
         self.load_shaders()
@@ -90,19 +90,21 @@ class SimpletexcoordsApp(application.Application):
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glDepthFunc(GL.GL_LEQUAL)
 
-    def load_shaders(self):
+    def load_shaders(self) -> None:
         if self.render_prog:
             GL.glDeleteProgram(self.render_prog)
         self.render_prog = common.compile_program_from_files(
             vs=_shader_path("render.vs.glsl"), fs=_shader_path("render.fs.glsl")
         )
-        self.uniform_mv = GL.glGetUniformLocation(self.render_prog, "mv_matrix")
-        self.uniform_proj = GL.glGetUniformLocation(
+        self.uniform_mv: int = GL.glGetUniformLocation(
+            self.render_prog, "mv_matrix"
+        )
+        self.uniform_proj: int = GL.glGetUniformLocation(
             self.render_prog, "proj_matrix"
         )
 
     @override
-    def render(self, current_time):
+    def render(self, current_time: float) -> None:
         gray: list[float] = [0.2, 0.2, 0.2, 1.0]
         ones: list[float] = [1.0]
 
@@ -138,7 +140,7 @@ class SimpletexcoordsApp(application.Application):
             self.load_shaders()
 
     @override
-    def shutdown(self):
+    def shutdown(self) -> None:
         self.torus.free()
         GL.glDeleteProgram(self.render_prog)
         GL.glDeleteTextures(2, self.tex_object)

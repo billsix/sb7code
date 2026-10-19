@@ -190,7 +190,7 @@ class LinesmoothApp(application.Application):
 
         if MANY_CUBES:
             for i in range(24):
-                f = float(i) + current_time * 0.3
+                f: float = float(i) + current_time * 0.3
                 mv: np.ndarray = (
                     vmath.translate(0.0, 0.0, -20.0)
                     @ vmath.rotate(current_time * 45.0, 0.0, 1.0, 0.0)

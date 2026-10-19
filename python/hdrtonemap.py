@@ -113,7 +113,7 @@ class HdrtonemapApp(application.Application):
             "program_exposure",
             "program_adaptive",
         ):
-            old = getattr(self, prog_attr)
+            old: int = getattr(self, prog_attr)
             if old:
                 GL.glDeleteProgram(old)
         self.program_naive = common.compile_program_from_files(

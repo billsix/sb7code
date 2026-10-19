@@ -47,7 +47,7 @@ RUN  --mount=type=cache,target=/var/cache/libdnf5 \
     python3 -m venv --system-site-packages /venv/ && \
     export VIRTUAL_ENV_DISABLE_PROMPT=1 && \
     source /venv/bin/activate && \
-    uv pip install setuptools && \
+    uv pip install setuptools ty && \
     uv pip install --python "$(which python)" -r /requirements.txt && \
     rm /requirements.txt
 

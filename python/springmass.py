@@ -31,8 +31,8 @@ from sb7 import application, common
 
 POINTS_X: int = 50
 POINTS_Y: int = 50
-POINTS_TOTAL = POINTS_X * POINTS_Y
-CONNECTIONS_TOTAL = (POINTS_X - 1) * POINTS_Y + (POINTS_Y - 1) * POINTS_X
+POINTS_TOTAL: int = POINTS_X * POINTS_Y
+CONNECTIONS_TOTAL: int = (POINTS_X - 1) * POINTS_Y + (POINTS_Y - 1) * POINTS_X
 
 # Indices into the m_vbo[] array — same enum as the C++ source.
 POSITION_A: int = 0
@@ -55,9 +55,9 @@ def _build_initial_data() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     n: int = 0
     for j in range(POINTS_Y):
-        fj = j / POINTS_Y
+        fj: float = j / POINTS_Y
         for i in range(POINTS_X):
-            fi = i / POINTS_X
+            fi: float = i / POINTS_X
             positions[n] = [
                 (fi - 0.5) * POINTS_X,
                 (fj - 0.5) * POINTS_Y,

@@ -96,22 +96,26 @@ void main(void)
 
 
 class ObjectexploderApp(application.Application):
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.info.title = "OpenGL SuperBible - Exploder"
 
     @override
-    def startup(self):
-        self.program = common.compile_program(
+    def startup(self) -> None:
+        self.program: int = common.compile_program(
             vs=VS_SOURCE, gs=GS_SOURCE, fs=FS_SOURCE
         )
-        self.uniform_mv = GL.glGetUniformLocation(self.program, "mv_matrix")
-        self.uniform_proj = GL.glGetUniformLocation(self.program, "proj_matrix")
-        self.uniform_explode = GL.glGetUniformLocation(
+        self.uniform_mv: int = GL.glGetUniformLocation(
+            self.program, "mv_matrix"
+        )
+        self.uniform_proj: int = GL.glGetUniformLocation(
+            self.program, "proj_matrix"
+        )
+        self.uniform_explode: int = GL.glGetUniformLocation(
             self.program, "explode_factor"
         )
 
-        self.torus = sb6m.Object()
+        self.torus: sb6m.Object = sb6m.Object()
         self.torus.load(
             os.path.join(common.require_media(), "objects", "torus.sbm")
         )
@@ -120,7 +124,7 @@ class ObjectexploderApp(application.Application):
         GL.glDepthFunc(GL.GL_LEQUAL)
 
     @override
-    def render(self, current_time):
+    def render(self, current_time: float) -> None:
         black: list[float] = [0.0, 0.0, 0.0, 1.0]
         one: list[float] = [1.0]
         f: float = float(current_time)
@@ -150,7 +154,7 @@ class ObjectexploderApp(application.Application):
         self.torus.render()
 
     @override
-    def shutdown(self):
+    def shutdown(self) -> None:
         self.torus.free()
         GL.glDeleteProgram(self.program)
 

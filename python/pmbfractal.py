@@ -17,7 +17,7 @@ Reads its shaders from ``media/shaders/fsq/``.
 
 import ctypes
 import os
-from typing import override
+from typing import Any, override
 
 import glfw  # noqa: F401
 import numpy as np
@@ -33,7 +33,7 @@ def _shader_path(name: str) -> str:
 
 FRACTAL_WIDTH: int = 512
 FRACTAL_HEIGHT: int = 512
-BUFFER_SIZE = FRACTAL_WIDTH * FRACTAL_HEIGHT
+BUFFER_SIZE: int = FRACTAL_WIDTH * FRACTAL_HEIGHT
 
 
 class PmbfractalApp(application.Application):
@@ -53,19 +53,22 @@ class PmbfractalApp(application.Application):
         # PyOpenGL constants are int subclasses at runtime, but the
         # stubs' `Constant` declares no `__or__`, so OR-ing two masks
         # trips ty.
-        flags = (
+        flags: int = (
             GL.GL_MAP_WRITE_BIT  # ty: ignore[unsupported-operator]
             | GL.GL_MAP_PERSISTENT_BIT
             | GL.GL_MAP_COHERENT_BIT
         )
         GL.glBufferStorage(GL.GL_PIXEL_UNPACK_BUFFER, BUFFER_SIZE, None, flags)
-        ptr = GL.glMapBufferRange(
+        # GL hands back an opaque mapped-buffer pointer (untyped lib).
+        ptr: Any = GL.glMapBufferRange(
             GL.GL_PIXEL_UNPACK_BUFFER, 0, BUFFER_SIZE, flags
         )
         # Wrap the raw GL pointer as a numpy array view. The
         # underlying memory stays alive for the lifetime of the
         # buffer thanks to GL_MAP_PERSISTENT_BIT.
-        c_arr = (ctypes.c_uint8 * BUFFER_SIZE).from_address(int(ptr))
+        c_arr: ctypes.Array[ctypes.c_uint8] = (
+            ctypes.c_uint8 * BUFFER_SIZE
+        ).from_address(int(ptr))
         self.mapped: np.ndarray | None = np.frombuffer(
             c_arr, dtype=np.uint8
         ).reshape(FRACTAL_HEIGHT, FRACTAL_WIDTH)
@@ -86,20 +89,24 @@ class PmbfractalApp(application.Application):
 
         # Pixel-grid coordinates as a persistent (W,H) mesh — reused
         # every frame. Cuts allocation cost out of the hot loop.
-        xs = np.arange(FRACTAL_WIDTH, dtype=np.float32) / FRACTAL_WIDTH - 0.5
-        ys = np.arange(FRACTAL_HEIGHT, dtype=np.float32) / FRACTAL_HEIGHT - 0.5
+        xs: np.ndarray = (
+            np.arange(FRACTAL_WIDTH, dtype=np.float32) / FRACTAL_WIDTH - 0.5
+        )
+        ys: np.ndarray = (
+            np.arange(FRACTAL_HEIGHT, dtype=np.float32) / FRACTAL_HEIGHT - 0.5
+        )
         self._gridx, self._gridy = np.meshgrid(xs, ys)
 
     def _update_fractal(self, t: float) -> None:
-        cx = (1.5 - np.cos(t * 0.4) * 0.5) * 0.3
-        cy = (1.5 + np.cos(t * 0.5) * 0.5) * 0.3
-        ox = np.cos(t * 0.14) * 0.25
-        oy = np.cos(t * 0.25) * 0.25
-        zoom = (np.sin(t) + 1.3) * 0.7
+        cx: np.floating[Any] = (1.5 - np.cos(t * 0.4) * 0.5) * 0.3
+        cy: np.floating[Any] = (1.5 + np.cos(t * 0.5) * 0.5) * 0.3
+        ox: np.float64 = np.cos(t * 0.14) * 0.25
+        oy: np.float64 = np.cos(t * 0.25) * 0.25
+        zoom: np.float64 = (np.sin(t) + 1.3) * 0.7
 
-        zx = (zoom * self._gridx + ox).astype(np.float32)
-        zy = (zoom * self._gridy + oy).astype(np.float32)
-        thresh_squared = np.float32(256.0)
+        zx: np.ndarray = (zoom * self._gridx + ox).astype(np.float32)
+        zy: np.ndarray = (zoom * self._gridy + oy).astype(np.float32)
+        thresh_squared: np.float32 = np.float32(256.0)
         cx = np.float32(cx)
         cy = np.float32(cy)
 
@@ -108,12 +115,12 @@ class PmbfractalApp(application.Application):
         it: np.ndarray = np.zeros_like(zx, dtype=np.int32)
         live: np.ndarray = np.ones_like(zx, dtype=bool)
         for n in range(256):
-            zx2 = zx * zx - zy * zy + cx
-            zy2 = 2.0 * zx * zy + cy
+            zx2: np.ndarray = zx * zx - zy * zy + cx
+            zy2: np.ndarray = 2.0 * zx * zy + cy
             zx, zy = zx2, zy2
-            mag2 = zx * zx + zy * zy
-            escaped = mag2 > thresh_squared
-            new_escape = live & escaped
+            mag2: np.ndarray = zx * zx + zy * zy
+            escaped: np.ndarray = mag2 > thresh_squared
+            new_escape: np.ndarray = live & escaped
             it[new_escape] = n
             live &= ~escaped
             if not live.any():

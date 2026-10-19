@@ -198,8 +198,8 @@ class BlendmatrixApp(application.Application):
         one: list[float] = [1.0]
 
         n: int = len(self.BLEND_FUNCS)
-        x_scale = 20.0 / n
-        y_scale = 16.0 / n
+        x_scale: float = 20.0 / n
+        y_scale: float = 16.0 / n
         t: float = float(current_time)
 
         GL.glViewport(0, 0, self.info.window_width, self.info.window_height)

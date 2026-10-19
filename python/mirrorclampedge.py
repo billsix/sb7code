@@ -14,6 +14,7 @@ from typing import override
 
 import glfw  # noqa: F401
 import OpenGL.GL as GL
+from OpenGL.constant import Constant
 from imgui_bundle import imgui
 
 from sb7 import application, colors, common, ktx
@@ -72,7 +73,7 @@ class MirrorclampedgeApp(application.Application):
         GL.glUseProgram(self.render_program)
 
         if self.display_mode == CLAMP_TO_BORDER:
-            wrap = GL.GL_CLAMP_TO_BORDER
+            wrap: int | Constant = GL.GL_CLAMP_TO_BORDER
         else:
             wrap = GL.GL_MIRROR_CLAMP_TO_EDGE
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, wrap)

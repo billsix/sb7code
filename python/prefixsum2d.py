@@ -34,6 +34,7 @@ import os
 from typing import override
 
 import glfw  # noqa: F401
+import numpy as np
 import OpenGL.GL as GL
 from imgui_bundle import imgui
 
@@ -110,7 +111,7 @@ class Prefixsum2dApp(application.Application):
         # Source: grayscale KTX texture.
         self.images[0] = ktx.load(_texture_path("salad-gray.ktx"))
         # Two scratch images that the compute pass writes into.
-        scratch = GL.glGenTextures(2)
+        scratch: np.ndarray = GL.glGenTextures(2)
         self.images[1] = int(scratch[0])
         self.images[2] = int(scratch[1])
         for i in (1, 2):

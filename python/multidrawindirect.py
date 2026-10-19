@@ -132,7 +132,7 @@ class MultidrawindirectApp(application.Application):
         # The C++ source uses normalize(vec3(0.1 - cos(t*0.1)*0.3, 1, 0))
         # for the up vector — keep the same.
         ux: float = 0.1 - math.cos(t * 0.1) * 0.3
-        un = (ux**2 + 1.0) ** 0.5
+        un: float = (ux**2 + 1.0) ** 0.5
         up: tuple[float, float, float] = (ux / un, 1.0 / un, 0.0)
         view: np.ndarray = vmath.lookat(eye, (0.0, 0.0, 260.0), up)
 
@@ -155,7 +155,7 @@ class MultidrawindirectApp(application.Application):
             )
             GL.glMultiDrawArraysIndirect(GL.GL_TRIANGLES, None, NUM_DRAWS, 0)
         else:
-            n_subs = self.asteroids.get_sub_object_count()
+            n_subs: int = self.asteroids.get_sub_object_count()
             for j in range(NUM_DRAWS):
                 first, count = self.asteroids.get_sub_object_info(j % n_subs)
                 GL.glDrawArraysInstancedBaseInstance(

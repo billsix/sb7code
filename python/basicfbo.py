@@ -360,7 +360,7 @@ class BasicfboApp(application.Application):
         )
         proj: np.ndarray = vmath.perspective(50.0, aspect, 0.1, 1000.0)
 
-        f = current_time * 0.3
+        f: float = current_time * 0.3
         mv: np.ndarray = (
             vmath.translate(0.0, 0.0, -4.0)
             @ vmath.translate(

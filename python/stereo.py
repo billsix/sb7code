@@ -21,6 +21,7 @@ from typing import override
 import glfw  # noqa: F401
 import numpy as np
 import OpenGL.GL as GL
+from OpenGL.constant import Constant
 from imgui_bundle import imgui
 
 from sb7 import application, common, sb6m, vmath
@@ -206,7 +207,7 @@ class StereoApp(application.Application):
         proj: np.ndarray,
         clear_color: list[float] | None,
         clear_depth: list[float] | None,
-        drawbuf,
+        drawbuf: int | Constant | None,
     ) -> None:
         if drawbuf is not None:
             GL.glDrawBuffer(drawbuf)

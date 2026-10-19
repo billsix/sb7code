@@ -48,7 +48,7 @@ def _build_materials() -> np.ndarray:
     as a single vec4 — total 12 floats per material, 4800 bytes."""
     out: np.ndarray = np.empty((NUM_MATERIALS, 12), dtype=np.float32)
     for i in range(NUM_MATERIALS):
-        f = i / NUM_MATERIALS
+        f: float = i / NUM_MATERIALS
         out[i, 0] = (math.sin(f * 3.7) + 1.0) * 0.1
         out[i, 1] = (math.sin(f * 5.7 + 3.0) + 1.0) * 0.1
         out[i, 2] = (math.sin(f * 4.3 + 2.0) + 2.0) * 0.1
@@ -87,7 +87,7 @@ class IndirectmaterialApp(application.Application):
         # Indirect-draw command buffer: one entry per draw, picking a
         # sub-mesh (i % num_objects) and a material (i % NUM_MATERIALS
         # via baseInstance).
-        n_subs = self.asteroids.get_sub_object_count()
+        n_subs: int = self.asteroids.get_sub_object_count()
         cmds: np.ndarray = np.empty((NUM_DRAWS, 4), dtype=np.uint32)
         for i in range(NUM_DRAWS):
             first, count = self.asteroids.get_sub_object_info(i % n_subs)
@@ -114,7 +114,7 @@ class IndirectmaterialApp(application.Application):
         GL.glBufferData(GL.GL_UNIFORM_BUFFER, 3 * 64, None, GL.GL_DYNAMIC_DRAW)
 
         # Materials UBO, populated once.
-        materials = _build_materials()
+        materials: np.ndarray = _build_materials()
         self.material_buffer: int = GL.glGenBuffers(1)
         GL.glBindBuffer(GL.GL_UNIFORM_BUFFER, self.material_buffer)
         GL.glBufferData(
@@ -141,13 +141,13 @@ class IndirectmaterialApp(application.Application):
 
         # Camera follows the same lissajous path as multidrawindirect's
         # asteroids so the field stays visible.
-        eye = (
+        eye: tuple[float, float, float] = (
             30.0 * math.cos(t * 0.023),
             30.0 * math.cos(t * 0.023),
             30.0 * math.sin(t * 0.037) - 200.0,
         )
         ux: float = 0.1 - math.cos(t * 0.1) * 0.3
-        un = (ux**2 + 1.0) ** 0.5
+        un: float = (ux**2 + 1.0) ** 0.5
         view: np.ndarray = vmath.lookat(
             eye, (0.0, 0.0, 0.0), (ux / un, 1.0 / un, 0.0)
         )
@@ -171,12 +171,12 @@ class IndirectmaterialApp(application.Application):
         )
 
         # Per-instance model matrices into the SSBO.
-        f = t * 0.1
+        f: float = t * 0.1
         models: np.ndarray = np.empty(
             (self.draws_per_frame, 4, 4), dtype=np.float32
         )
         for i in range(self.draws_per_frame):
-            m = vmath.translate(
+            m: np.ndarray = vmath.translate(
                 math.sin(f * 7.3) * 70.0,
                 math.sin(f * 3.7 + 2.0) * 70.0,
                 math.sin(f * 2.9 + 8.0) * 70.0,

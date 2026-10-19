@@ -57,7 +57,7 @@ class DflandscapeApp(application.Application):
                 GL.GL_TEXTURE_MIN_FILTER,
                 GL.GL_LINEAR_MIPMAP_LINEAR,
             )
-            attr = {
+            attr: str = {
                 "psycho-map-df-sm.ktx": "map_texture",
                 "mossygrass.ktx": "grass_texture",
                 "rocks.ktx": "rocks_texture",

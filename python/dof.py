@@ -85,7 +85,7 @@ class DofApp(application.Application):
         # five dragons.
         self.objects: list[sb6m.Object] = []
         for _ in range(OBJECT_COUNT):
-            obj = sb6m.Object()
+            obj: sb6m.Object = sb6m.Object()
             obj.load(_model_path("dragon.sbm"))
             self.objects.append(obj)
 
@@ -184,14 +184,14 @@ class DofApp(application.Application):
         )
 
         # Five instances staircased into the distance.
-        offsets = [
+        offsets: list[tuple[float, float, float]] = [
             (5.0, 0.0, 20.0),
             (-5.0, 0.0, 0.0),
             (-15.0, 0.0, -20.0),
             (-25.0, 0.0, -40.0),
             (-35.0, 0.0, -60.0),
         ]
-        models = []
+        models: list[np.ndarray] = []
         for ox, oy, oz in offsets:
             m: np.ndarray = (
                 vmath.translate(ox, oy, oz)
@@ -211,7 +211,7 @@ class DofApp(application.Application):
         GL.glUseProgram(self.view_program)
         GL.glUniformMatrix4fv(self.u_view_proj, 1, GL.GL_FALSE, proj.T)
         for i, model in enumerate(models):
-            mv = view @ model
+            mv: np.ndarray = view @ model
             GL.glUniformMatrix4fv(self.u_view_mv, 1, GL.GL_FALSE, mv.T)
             GL.glUniform3fv(self.u_view_diffuse, 1, COLORS[i, :3])
             self.objects[i].render()

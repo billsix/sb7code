@@ -149,7 +149,7 @@ class GscullingApp(application.Application):
 
         vmath.upload(self.uniform_mvp, proj @ mv)
         vmath.upload(self.uniform_mv, mv)
-        viewpoint = (
+        viewpoint: tuple[float, float, float] = (
             math.sin(f * 2.1) * 70.0,
             math.cos(f * 1.4) * 70.0,
             math.sin(f * 0.7) * 70.0,

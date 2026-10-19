@@ -83,7 +83,7 @@ class KtxviewApp(application.Application):
         GL.glViewport(0, 0, self.info.window_width, self.info.window_height)
 
         if self.auto_exposure:
-            exposure = math.sin(current_time) * 16.0 + 16.0
+            exposure: float = math.sin(current_time) * 16.0 + 16.0
         else:
             exposure = self.manual_exposure
         GL.glUniform1f(self.exposure_loc, exposure)

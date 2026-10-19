@@ -28,7 +28,7 @@ def _shader_path(name: str) -> str:
     return os.path.join(common.require_media(), "shaders", "cubicbezier", name)
 
 
-PATCH_INITIALIZER = np.array(
+PATCH_INITIALIZER: np.ndarray = np.array(
     [
         -1.0,
         -1.0,
@@ -220,7 +220,7 @@ class CubicbezierApp(application.Application):
         if not self.paused:
             self._total_time += current_time - self._last_time
         self._last_time = current_time
-        t = self._total_time
+        t: float = self._total_time
 
         GL.glViewport(0, 0, self.info.window_width, self.info.window_height)
         GL.glClearBufferfv(GL.GL_COLOR, 0, gray)
@@ -228,9 +228,9 @@ class CubicbezierApp(application.Application):
         GL.glEnable(GL.GL_DEPTH_TEST)
 
         # Animate z components.
-        patch = PATCH_INITIALIZER.copy()
+        patch: np.ndarray = PATCH_INITIALIZER.copy()
         for i in range(16):
-            fi = i / 16.0
+            fi: float = i / 16.0
             patch[i, 2] = math.sin(t * (0.2 + fi * 0.3))
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.patch_buffer)
         GL.glBufferSubData(
@@ -249,7 +249,7 @@ class CubicbezierApp(application.Application):
             @ vmath.rotate(t * 10.0, 0.0, 1.0, 0.0)
             @ vmath.rotate(t * 17.0, 1.0, 0.0, 0.0)
         )
-        mvp = proj @ mv
+        mvp: np.ndarray = proj @ mv
 
         vmath.upload(self.uniform_patch_mv, mv)
         vmath.upload(self.uniform_patch_proj, proj)

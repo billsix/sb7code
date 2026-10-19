@@ -129,22 +129,24 @@ VERTEX_POSITIONS: np.ndarray = np.array(
 
 
 class PolygonsmoothApp(application.Application):
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.info.title = "OpenGL SuperBible - Polygon Smooth"
 
     @override
-    def startup(self):
-        self.program = common.compile_program(vs=VS_SOURCE, fs=FS_SOURCE)
-        self.mv_location = GL.glGetUniformLocation(self.program, "mv_matrix")
-        self.proj_location = GL.glGetUniformLocation(
+    def startup(self) -> None:
+        self.program: int = common.compile_program(vs=VS_SOURCE, fs=FS_SOURCE)
+        self.mv_location: int = GL.glGetUniformLocation(
+            self.program, "mv_matrix"
+        )
+        self.proj_location: int = GL.glGetUniformLocation(
             self.program, "proj_matrix"
         )
 
-        self.vao = GL.glGenVertexArrays(1)
+        self.vao: int = GL.glGenVertexArrays(1)
         GL.glBindVertexArray(self.vao)
 
-        self.position_buffer = GL.glGenBuffers(1)
+        self.position_buffer: int = GL.glGenBuffers(1)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.position_buffer)
         GL.glBufferData(
             GL.GL_ARRAY_BUFFER,
@@ -155,7 +157,7 @@ class PolygonsmoothApp(application.Application):
         GL.glVertexAttribPointer(0, 3, GL.GL_FLOAT, GL.GL_FALSE, 0, None)
         GL.glEnableVertexAttribArray(0)
 
-        self.index_buffer = GL.glGenBuffers(1)
+        self.index_buffer: int = GL.glGenBuffers(1)
         GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.index_buffer)
         GL.glBufferData(
             GL.GL_ELEMENT_ARRAY_BUFFER,
@@ -167,7 +169,7 @@ class PolygonsmoothApp(application.Application):
         GL.glEnable(GL.GL_CULL_FACE)
 
     @override
-    def render(self, current_time):
+    def render(self, current_time: float) -> None:
         black: list[float] = [0.0, 0.0, 0.0, 1.0]
 
         GL.glViewport(0, 0, self.info.window_width, self.info.window_height)
@@ -187,7 +189,7 @@ class PolygonsmoothApp(application.Application):
 
         if MANY_CUBES:
             for i in range(24):
-                f = float(i) + current_time * 0.3
+                f: float = float(i) + current_time * 0.3
                 mv: np.ndarray = (
                     vmath.translate(0.0, 0.0, -20.0)
                     @ vmath.rotate(current_time * 45.0, 0.0, 1.0, 0.0)
@@ -212,7 +214,7 @@ class PolygonsmoothApp(application.Application):
             GL.glDrawElements(GL.GL_TRIANGLES, 36, GL.GL_UNSIGNED_SHORT, None)
 
     @override
-    def shutdown(self):
+    def shutdown(self) -> None:
         GL.glDeleteVertexArrays(1, [self.vao])
         GL.glDeleteProgram(self.program)
         GL.glDeleteBuffers(1, [self.position_buffer])

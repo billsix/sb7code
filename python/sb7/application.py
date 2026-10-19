@@ -172,6 +172,8 @@ class Application:
         Default: pick a sensible default window size from the primary
         monitor (1920x1080 capped, mvp convention) so demos that don't
         override ``init()`` still get a properly-sized window."""
+        w: int
+        h: int
         w, h = window.resolve_default_window_size()
         self.info.window_width = w
         self.info.window_height = h
@@ -267,7 +269,7 @@ class Application:
             if self.info.flags.debug:
                 glfw.window_hint(glfw.OPENGL_DEBUG_CONTEXT, GL.GL_TRUE)  # ty: ignore[invalid-argument-type]
 
-            monitor = (
+            monitor: Any = (
                 glfw.get_primary_monitor()
                 if self.info.flags.fullscreen
                 else None
@@ -380,7 +382,7 @@ class Application:
         glfw.set_scroll_callback(self.window, _wheel)
 
 
-def run(cls: type) -> None:
+def run(cls: type[Application]) -> None:
     """Entry point. Instantiate ``cls``, call ``run()``, dispose.
 
     Equivalent of the C++ ``DECLARE_MAIN(cls)`` macro::

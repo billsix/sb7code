@@ -67,9 +67,9 @@ void main(void)
 """
 
 
-TES_EQUAL = _tes_source("")
-TES_FRACT_EVEN = _tes_source(", fractional_even_spacing")
-TES_FRACT_ODD = _tes_source(", fractional_odd_spacing")
+TES_EQUAL: str = _tes_source("")
+TES_FRACT_EVEN: str = _tes_source(", fractional_even_spacing")
+TES_FRACT_ODD: str = _tes_source(", fractional_odd_spacing")
 
 FS_SOURCE: str = """
 #version 420 core

@@ -174,7 +174,7 @@ class DeferredshadingApp(application.Application):
             "light_program",
             "vis_program",
         ):
-            old = getattr(self, attr)
+            old: int = getattr(self, attr)
             if old:
                 GL.glDeleteProgram(old)
         self.render_program = common.compile_program_from_files(
@@ -219,7 +219,7 @@ class DeferredshadingApp(application.Application):
         )
         proj: np.ndarray = vmath.perspective(50.0, aspect, 0.1, 1000.0)
         d: float = (math.sin(t * 0.131) + 2.0) * 0.15
-        eye = (
+        eye: tuple[float, float, float] = (
             d * 120.0 * math.sin(t * 0.11),
             5.5,
             d * 120.0 * math.cos(t * 0.01),

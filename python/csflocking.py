@@ -35,7 +35,7 @@ def _shader_path(name: str) -> str:
 
 WORKGROUP_SIZE: int = 256  # local_size_x in flocking.cs.glsl
 MAX_WORKGROUPS: int = 64
-MAX_FLOCK_SIZE = MAX_WORKGROUPS * WORKGROUP_SIZE
+MAX_FLOCK_SIZE: int = MAX_WORKGROUPS * WORKGROUP_SIZE
 # Each member is two vec4s (vec3 + 4 bytes padding × 2) = 32 bytes.
 FLOCK_MEMBER_BYTES: int = 32
 
@@ -170,7 +170,7 @@ class CsflockingApp(application.Application):
 
         # Initial flock state: random positions in ±150, random unit
         # velocities. Layout matches flock_member exactly.
-        rng = np.random.default_rng(0xC0FFEE)
+        rng: np.random.Generator = np.random.default_rng(0xC0FFEE)
         init: np.ndarray = np.zeros((MAX_FLOCK_SIZE, 8), dtype=np.float32)
         init[:, 0:3] = (
             rng.random((MAX_FLOCK_SIZE, 3), dtype=np.float32) - 0.5
@@ -244,10 +244,10 @@ class CsflockingApp(application.Application):
             0.1,
             3000.0,
         )
-        mvp = proj @ view
+        mvp: np.ndarray = proj @ view
         GL.glUniformMatrix4fv(self.u_mvp, 1, GL.GL_FALSE, mvp.T)
 
-        live_flock = self.num_workgroups * WORKGROUP_SIZE
+        live_flock: int = self.num_workgroups * WORKGROUP_SIZE
         GL.glBindVertexArray(self.flock_render_vao[self.frame_index])
         GL.glDrawArraysInstanced(GL.GL_TRIANGLE_STRIP, 0, 8, live_flock)
 

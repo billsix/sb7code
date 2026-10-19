@@ -98,7 +98,9 @@ class RimlightApp(application.Application):
         )
         vmath.upload(self.uniform_mv, mv)
 
-        rim_color = self.rim_color if self.rim_enable else [0.0, 0.0, 0.0]
+        rim_color: list[float] = (
+            self.rim_color if self.rim_enable else [0.0, 0.0, 0.0]
+        )
         GL.glUniform3fv(self.uniform_rim_color, 1, rim_color)
         GL.glUniform1f(self.uniform_rim_power, self.rim_power)
 

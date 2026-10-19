@@ -104,7 +104,7 @@ class CubemapenvApp(application.Application):
             (0.0, 0.0, 0.0),
             (0.0, 1.0, 0.0),
         )
-        mv = (
+        mv: np.ndarray = (
             view
             @ vmath.rotate(t, 1.0, 0.0, 0.0)
             @ vmath.rotate(t * 130.1, 0.0, 1.0, 0.0)

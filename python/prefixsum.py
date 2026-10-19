@@ -34,7 +34,7 @@ NUM_ELEMENTS: int = 2048
 
 
 def _make_input(seed: int = 0x13371337) -> np.ndarray:
-    rng = np.random.default_rng(seed)
+    rng: np.random.Generator = np.random.default_rng(seed)
     return rng.random(NUM_ELEMENTS, dtype=np.float32)
 
 
@@ -171,7 +171,7 @@ class PrefixsumApp(application.Application):
         # dtype/shape. We use the return value so we don't depend on
         # in-place fill semantics.
         GL.glBindBuffer(GL.GL_SHADER_STORAGE_BUFFER, self.data_buffer[1])
-        readback = GL.glGetBufferSubData(
+        readback: np.ndarray = GL.glGetBufferSubData(
             GL.GL_SHADER_STORAGE_BUFFER, 0, NUM_ELEMENTS * 4
         )
         gpu: np.ndarray = np.frombuffer(readback, dtype=np.float32).copy()
@@ -204,7 +204,7 @@ class PrefixsumApp(application.Application):
         )
         imgui.separator()
 
-        graph_size = (680, 140)
+        graph_size: tuple[int, int] = (680, 140)
         imgui.text("Input  (per-element values, range [0, 1))")
         imgui.plot_lines(
             "##input",
@@ -217,9 +217,9 @@ class PrefixsumApp(application.Application):
         # max or the CPU max. A flat-zero output would otherwise sit
         # exactly on the bottom border and be invisible — we pick a
         # nonzero floor so the line is always drawn.
-        gpu_max = float(np.max(gpu)) if gpu.size else 0.0
+        gpu_max: float = float(np.max(gpu)) if gpu.size else 0.0
         cpu_max: float = float(self.cpu_output[-1])
-        scale_max = max(gpu_max, cpu_max, 1e-3)
+        scale_max: float = max(gpu_max, cpu_max, 1e-3)
         imgui.text(
             "Output (GPU cumulative sum — should be monotonically increasing)"
         )

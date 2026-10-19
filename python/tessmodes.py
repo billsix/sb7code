@@ -140,7 +140,7 @@ void main(void)
 
 
 # (TCS, TES, label) — order matches the C++ source's program[] indexing.
-PROGRAMS_SPEC = [
+PROGRAMS_SPEC: list[tuple[str, str, str]] = [
     (TCS_QUADS, TES_QUADS, "QUADS"),
     (TCS_TRIANGLES, TES_TRIANGLES, "TRIANGLES"),
     (TCS_TRIANGLES, TES_TRIANGLES_AS_POINTS, "QUADS AS POINTS"),

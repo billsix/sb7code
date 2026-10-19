@@ -54,9 +54,11 @@ class _Random:
 
     def next_float(self) -> float:
         self.seed = (self.seed * 16807) & 0xFFFFFFFF
-        tmp = self.seed ^ (self.seed >> 4) ^ ((self.seed << 15) & 0xFFFFFFFF)
-        bits = (tmp >> 9) | 0x3F800000
-        f = np.frombuffer(
+        tmp: int = (
+            self.seed ^ (self.seed >> 4) ^ ((self.seed << 15) & 0xFFFFFFFF)
+        )
+        bits: int = (tmp >> 9) | 0x3F800000
+        f: np.float32 = np.frombuffer(
             np.uint32(bits & 0xFFFFFFFF).tobytes(), dtype=np.float32
         )[0]
         return float(f - 1.0)
@@ -124,7 +126,7 @@ class OmpparticlesApp(application.Application):
           delta_dir = delta_pos / |delta_pos|
           delta_v[i] += delta_dir / max(|delta_pos|, 0.005)²
         """
-        p = self.position  # (N, 3)
+        p: np.ndarray = self.position  # (N, 3)
         # Pairwise displacement: (N, N, 3).
         delta_pos: np.ndarray = p[None, :, :] - p[:, None, :]
         # Pairwise distance, clamped to 0.005.

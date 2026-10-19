@@ -74,11 +74,13 @@ class _Random:
 
     def next_float(self) -> float:
         self.seed = (self.seed * 16807) & 0xFFFFFFFF
-        tmp = self.seed ^ (self.seed >> 4) ^ ((self.seed << 15) & 0xFFFFFFFF)
+        tmp: int = (
+            self.seed ^ (self.seed >> 4) ^ ((self.seed << 15) & 0xFFFFFFFF)
+        )
         # Same trick: take top 23 bits, OR with exponent for [1.0, 2.0)
         # then subtract 1 to get [0.0, 1.0).
-        bits = (tmp >> 9) | 0x3F800000
-        f = np.frombuffer(
+        bits: int = (tmp >> 9) | 0x3F800000
+        f: np.float32 = np.frombuffer(
             np.uint32(bits & 0xFFFFFFFF).tobytes(), dtype=np.float32
         )[0]
         return float(f - 1.0)

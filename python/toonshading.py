@@ -23,7 +23,7 @@ from imgui_bundle import imgui
 from sb7 import application, common, sb6m, vmath
 
 
-def _shader_path(name):
+def _shader_path(name: str) -> str:
     return os.path.join(common.require_media(), "shaders", "toonshading", name)
 
 
@@ -53,17 +53,17 @@ TOON_TEX_DATA: np.ndarray = np.array(
 
 
 class ToonshadingApp(application.Application):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.render_prog = 0
+        self.render_prog: int = 0
 
-    def init(self):
+    def init(self) -> None:
         super().init()
         self.info.title = "OpenGL SuperBible - Toon Shading"
 
     @override
-    def startup(self):
-        self.tex_toon = GL.glGenTextures(1)
+    def startup(self) -> None:
+        self.tex_toon: int = GL.glGenTextures(1)
         GL.glBindTexture(GL.GL_TEXTURE_1D, self.tex_toon)
         GL.glTexStorage1D(GL.GL_TEXTURE_1D, 1, GL.GL_RGB8, 4)
         GL.glTexSubImage1D(
@@ -85,7 +85,7 @@ class ToonshadingApp(application.Application):
             GL.GL_TEXTURE_1D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE
         )
 
-        self.object = sb6m.Object()
+        self.object: sb6m.Object = sb6m.Object()
         self.object.load(
             os.path.join(common.require_media(), "objects", "torus_nrms_tc.sbm")
         )
@@ -95,20 +95,22 @@ class ToonshadingApp(application.Application):
         GL.glEnable(GL.GL_DEPTH_TEST)
         GL.glDepthFunc(GL.GL_LEQUAL)
 
-    def load_shaders(self):
+    def load_shaders(self) -> None:
         if self.render_prog:
             GL.glDeleteProgram(self.render_prog)
         self.render_prog = common.compile_program_from_files(
             vs=_shader_path("toonshading.vs.glsl"),
             fs=_shader_path("toonshading.fs.glsl"),
         )
-        self.uniform_mv = GL.glGetUniformLocation(self.render_prog, "mv_matrix")
-        self.uniform_proj = GL.glGetUniformLocation(
+        self.uniform_mv: int = GL.glGetUniformLocation(
+            self.render_prog, "mv_matrix"
+        )
+        self.uniform_proj: int = GL.glGetUniformLocation(
             self.render_prog, "proj_matrix"
         )
 
     @override
-    def render(self, current_time):
+    def render(self, current_time: float) -> None:
         gray: list[float] = [0.1, 0.1, 0.1, 1.0]
         ones: list[float] = [1.0]
 
@@ -140,7 +142,7 @@ class ToonshadingApp(application.Application):
             self.load_shaders()
 
     @override
-    def shutdown(self):
+    def shutdown(self) -> None:
         self.object.free()
         GL.glDeleteProgram(self.render_prog)
         GL.glDeleteTextures(1, [self.tex_toon])

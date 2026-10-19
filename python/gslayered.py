@@ -125,7 +125,7 @@ class GslayeredApp(application.Application):
         ubo: np.ndarray = np.empty((17, 4, 4), dtype=np.float32)
         ubo[0] = proj.T
         for i in range(NUM_LAYERS):
-            fi = (i + 12) / 16.0
+            fi: float = (i + 12) / 16.0
             mv: np.ndarray = (
                 vmath.translate(0.0, 0.0, -4.0)
                 @ vmath.rotate(t * 25.0 * fi, 0.0, 0.0, 1.0)

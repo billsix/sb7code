@@ -133,7 +133,7 @@ class InstancedattribsApp(application.Application):
         GL.glBindVertexArray(self.square_vao)
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.square_buffer)
 
-        total = (
+        total: int = (
             SQUARE_VERTICES.nbytes
             + INSTANCE_COLORS.nbytes
             + INSTANCE_POSITIONS.nbytes

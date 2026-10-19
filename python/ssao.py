@@ -47,9 +47,11 @@ class _Random:
 
     def next_float(self) -> float:
         self.seed = (self.seed * 16807) & 0xFFFFFFFF
-        tmp = self.seed ^ (self.seed >> 4) ^ ((self.seed << 15) & 0xFFFFFFFF)
-        bits = (tmp >> 9) | 0x3F800000
-        f = np.frombuffer(
+        tmp: int = (
+            self.seed ^ (self.seed >> 4) ^ ((self.seed << 15) & 0xFFFFFFFF)
+        )
+        bits: int = (tmp >> 9) | 0x3F800000
+        f: np.float32 = np.frombuffer(
             np.uint32(bits & 0xFFFFFFFF).tobytes(), dtype=np.float32
         )[0]
         return float(f - 1.0)
@@ -117,7 +119,7 @@ class SsaoApp(application.Application):
 
         # Three attachments: shaded color (RGB16F), normal+depth
         # (RGBA32F), depth (DEPTH_COMPONENT32F).
-        self.fbo_textures = GL.glGenTextures(3)
+        self.fbo_textures: np.ndarray = GL.glGenTextures(3)
 
         GL.glBindTexture(GL.GL_TEXTURE_2D, self.fbo_textures[0])
         GL.glTexStorage2D(GL.GL_TEXTURE_2D, 1, GL.GL_RGB16F, FBO_SIZE, FBO_SIZE)

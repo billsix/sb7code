@@ -38,9 +38,10 @@ the C++ loader, we restore ``glBindVertexArray(0)`` and
 
 from __future__ import annotations
 
+import io
 import struct
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, TypeAlias
 
 import OpenGL.GL as GL
 from OpenGL.constant import Constant
@@ -49,15 +50,15 @@ from OpenGL.constant import Constant
 #: resolve to ``OpenGL.constant.Constant``, not ``int``, so a plain
 #: ``int`` annotation rejects them (house pattern, same as
 #: ``src/modelviewprojection/wxapp.py``).
-GLenum = int | Constant
+GLenum: TypeAlias = int | Constant
 
-_MAGIC = b"SB6M"
-_HEADER_FMT = "<4sIII"  # magic, size, num_chunks, flags
-_HEADER_SIZE = 16
-_CHUNK_HDR = "<4sI"  # name, size
+_MAGIC: bytes = b"SB6M"
+_HEADER_FMT: str = "<4sIII"  # magic, size, num_chunks, flags
+_HEADER_SIZE: int = 16
+_CHUNK_HDR: str = "<4sI"  # name, size
 
-_FLAG_NORMALIZED = 0x00000001
-_FLAG_INTEGER = 0x00000002
+_FLAG_NORMALIZED: int = 0x00000001
+_FLAG_INTEGER: int = 0x00000002
 
 
 @dataclass
@@ -80,36 +81,51 @@ class _SubObject:
 class _Chunks:
     """Chunks the loader cared about, captured by FourCC."""
 
-    vertex_data: Optional[tuple] = None  # (data_size, data_offset, total_v)
-    index_data: Optional[tuple] = None  # (index_type, count, offset)
+    # (data_size, data_offset, total_v)
+    vertex_data: Optional[tuple[int, int, int]] = None
+    # (index_type, count, offset)
+    index_data: Optional[tuple[int, int, int]] = None
     attrib_chunk: Optional[List[_AttribDecl]] = None
     sub_objects: Optional[List[_SubObject]] = None
-    data_chunk: Optional[tuple] = None  # (encoding, offset, length)
+    # (encoding, offset, length)
+    data_chunk: Optional[tuple[int, int, int]] = None
 
 
 def _parse_chunks(data: bytes) -> tuple[_Chunks, int]:
     if len(data) < _HEADER_SIZE:
         raise ValueError("SBM file too short for header")
+    magic: bytes
+    hsize: int
+    n_chunks: int
+    _flags: int
     magic, hsize, n_chunks, _flags = struct.unpack(
         _HEADER_FMT, data[:_HEADER_SIZE]
     )
     if magic != _MAGIC:
         raise ValueError(f"not an SBM file (got {magic!r})")
 
-    chunks = _Chunks()
-    ptr = hsize
+    chunks: _Chunks = _Chunks()
+    ptr: int = hsize
     for _ in range(n_chunks):
+        cname: bytes
+        csize: int
         cname, csize = struct.unpack(_CHUNK_HDR, data[ptr : ptr + 8])
         if cname == b"ATRB":
+            attrib_count: int
             (attrib_count,) = struct.unpack("<I", data[ptr + 8 : ptr + 12])
             attrs: List[_AttribDecl] = []
-            off = ptr + 12
+            off: int = ptr + 12
             for _ in range(attrib_count):
-                name = (
+                name: str = (
                     data[off : off + 64]
                     .rstrip(b"\0")
                     .decode("ascii", errors="replace")
                 )
+                size: int
+                type_: int
+                stride: int
+                flags: int
+                doff: int
                 size, type_, stride, flags, doff = struct.unpack(
                     "<5I", data[off + 64 : off + 84]
                 )
@@ -119,25 +135,35 @@ def _parse_chunks(data: bytes) -> tuple[_Chunks, int]:
                 off += 84
             chunks.attrib_chunk = attrs
         elif cname == b"VRTX":
+            data_size: int
+            total_v: int
             data_size, doff, total_v = struct.unpack(
                 "<3I", data[ptr + 8 : ptr + 20]
             )
             chunks.vertex_data = (data_size, doff, total_v)
         elif cname == b"INDX":
+            idx_type: int
+            idx_count: int
+            idx_off: int
             idx_type, idx_count, idx_off = struct.unpack(
                 "<3I", data[ptr + 8 : ptr + 20]
             )
             chunks.index_data = (idx_type, idx_count, idx_off)
         elif cname == b"OLST":
+            count: int
             (count,) = struct.unpack("<I", data[ptr + 8 : ptr + 12])
             subs: List[_SubObject] = []
             off = ptr + 12
             for _ in range(count):
+                first: int
+                cnt: int
                 first, cnt = struct.unpack("<2I", data[off : off + 8])
                 subs.append(_SubObject(first, cnt))
                 off += 8
             chunks.sub_objects = subs
         elif cname == b"DATA":
+            encoding: int
+            dlen: int
             encoding, doff, dlen = struct.unpack(
                 "<3I", data[ptr + 8 : ptr + 20]
             )
@@ -175,12 +201,14 @@ class Object:
             self.data_buffer = 0
 
     def load(self, filename: str) -> None:
+        f: io.BufferedReader
         with open(filename, "rb") as f:
-            data = f.read()
+            data: bytes = f.read()
         self._load_from_bytes(data)
 
     def _load_from_bytes(self, data: bytes) -> None:
         self.free()
+        chunks: _Chunks
         chunks, _ = _parse_chunks(data)
 
         if chunks.attrib_chunk is None:
@@ -194,6 +222,9 @@ class Object:
 
         if chunks.data_chunk is not None:
             # Single packed DATA chunk. Use it directly.
+            _enc: int
+            doff: int
+            dlen: int
             _enc, doff, dlen = chunks.data_chunk
             GL.glBufferData(
                 GL.GL_ARRAY_BUFFER,
@@ -205,18 +236,23 @@ class Object:
             # Vertex data + (optional) index data. The C++ loader
             # packs both into the same buffer. Vertex data goes at
             # offset 0; index data follows immediately after.
-            v_size = 0
+            v_size: int = 0
             if chunks.vertex_data is not None:
                 v_size = chunks.vertex_data[0]
-            i_size = 0
+            i_size: int = 0
             if chunks.index_data is not None:
+                idx_type: int
+                idx_count: int
+                _idx_off: int
                 idx_type, idx_count, _idx_off = chunks.index_data
                 i_size = idx_count * _index_size(idx_type)
 
-            total = v_size + i_size
+            total: int = v_size + i_size
             GL.glBufferData(GL.GL_ARRAY_BUFFER, total, None, GL.GL_STATIC_DRAW)
 
             if chunks.vertex_data is not None:
+                v_data_size: int
+                v_doff: int
                 v_data_size, v_doff, _ = chunks.vertex_data
                 GL.glBufferSubData(
                     GL.GL_ARRAY_BUFFER,
@@ -225,6 +261,7 @@ class Object:
                     data[v_doff : v_doff + v_data_size],
                 )
             if chunks.index_data is not None:
+                idx_off: int
                 idx_type, idx_count, idx_off = chunks.index_data
                 GL.glBufferSubData(
                     GL.GL_ARRAY_BUFFER,
@@ -234,8 +271,10 @@ class Object:
                 )
 
         # Wire up vertex attributes per ATRB chunk.
+        i: int
+        ad: _AttribDecl
         for i, ad in enumerate(chunks.attrib_chunk):
-            normalized = (
+            normalized: GLenum = (
                 GL.GL_TRUE if (ad.flags & _FLAG_NORMALIZED) else GL.GL_FALSE
             )
             if ad.flags & _FLAG_INTEGER:
@@ -271,7 +310,7 @@ class Object:
             # No sub-object list: synthesize a single one covering
             # all the geometry.
             if chunks.index_data is not None:
-                count = chunks.index_data[1]
+                count: int = chunks.index_data[1]
             else:
                 count = chunks.vertex_data[2] if chunks.vertex_data else 0
             self.sub_objects = [_SubObject(0, count)]
@@ -287,14 +326,14 @@ class Object:
     ) -> None:
         if not self.sub_objects:
             return
-        sub = self.sub_objects[index]
+        sub: _SubObject = self.sub_objects[index]
         GL.glBindVertexArray(self.vao)
 
         if self.index_type != GL.GL_NONE:
             # Element-buffer offset = sub-object's first element ×
             # bytes-per-index, plus this object's own index_offset
             # within the buffer.
-            byte_offset = self.index_offset + sub.first * _index_size(
+            byte_offset: int = self.index_offset + sub.first * _index_size(
                 self.index_type
             )
             GL.glDrawElementsInstancedBaseInstance(
@@ -319,6 +358,6 @@ class Object:
 
     def get_sub_object_info(self, index: int) -> tuple[int, int]:
         if 0 <= index < len(self.sub_objects):
-            s = self.sub_objects[index]
+            s: _SubObject = self.sub_objects[index]
             return s.first, s.count
         return 0, 0
