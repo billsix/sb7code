@@ -37,7 +37,7 @@ of them).
   shaders under `bin/media/shaders/`). The port references it, never duplicates it
   (`frameworks.md` §7). Committing the pack is a **deliberate departure** from
   sb7code's external-download design — see the note in `frameworks.md` §7 and
-  [`tasks/pythonize-and-containerize-port.md`](../../pythonize-and-containerize-port.md).
+  [`tasks/archive/2026/10/19/pythonize-and-containerize-port.md`](../../archive/2026/10/19/pythonize-and-containerize-port.md).
 - The C++ originals are right here: each `python/<name>.py` has its
   counterpart in `src/<name>/<name>.cpp` (+ the `sb7` framework in `lib/` and
   `include/`), which is what the fidelity picture compares against.
@@ -64,6 +64,6 @@ maintainer's to run (`fidelity-audit.md`).
 ## Related (elsewhere in this repo)
 
 - [`python/README.md`](../../../python/README.md) — the per-demo run notes.
-- [`tasks/pythonize-and-containerize-port.md`](../../pythonize-and-containerize-port.md)
+- [`tasks/archive/2026/10/19/pythonize-and-containerize-port.md`](../../archive/2026/10/19/pythonize-and-containerize-port.md)
   — the extraction task: the new layout, the editable-package and committed-media
   decisions, and the vendoring of `window`.

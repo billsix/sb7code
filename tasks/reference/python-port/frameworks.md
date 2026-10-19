@@ -131,4 +131,4 @@ SuperBible 7e media as an external, separately-licensed download from openglsupe
 `bin/` gitignore, the CMake download step, and the `bin/media/!OBTAIN_THE_MEDIA_PACK…` placeholder
 are its mechanism). Committing it makes the repo self-contained; the recorded caveat (the pack
 is not this project's to redistribute, so it may be a licensing concern) and how to reverse the
-choice are in [`tasks/pythonize-and-containerize-port.md`](../../pythonize-and-containerize-port.md).
+choice are in [`tasks/archive/2026/10/19/pythonize-and-containerize-port.md`](../../archive/2026/10/19/pythonize-and-containerize-port.md).

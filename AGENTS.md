@@ -84,7 +84,7 @@ committed `bin/media/`. CMake is invoked with
 (upstream gitignores `bin/` and downloads the pack from openglsuperbible.com at
 build time). This is a deliberate maintainer decision for a self-contained repo,
 with a recorded licensing caveat — see `bin/media/README.md` and
-`tasks/pythonize-and-containerize-port.md`. The CMakeLists was adjusted to skip
+`tasks/archive/2026/10/19/pythonize-and-containerize-port.md`. The CMakeLists was adjusted to skip
 its media download when the committed media is present.
 
 ## Cold-start knowledge for the port

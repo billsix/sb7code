@@ -17,4 +17,4 @@ project's to redistribute, so committing it may be a licensing concern. It is
 tracked here anyway as a conscious choice, labelled rather than done silently.
 To reverse: `git rm -r --cached bin/media`, restore the `bin/` line in the
 top-level `.gitignore`, and rely on the CMake download again. Full rationale:
-`tasks/pythonize-and-containerize-port.md`.
+`tasks/archive/2026/10/19/pythonize-and-containerize-port.md`.
